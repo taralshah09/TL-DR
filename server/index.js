@@ -15,7 +15,11 @@ import {
   deleteCourse,
 } from "./controllers/courseController.js";
 import { chat, getChatHistory } from "./controllers/chatController.js";
-import { submitQuiz } from "./controllers/quizController.js";
+import { submitQuiz, createStandaloneQuiz, getQuizzesByVideo, submitStandaloneQuiz, getQuizById, deleteQuiz, updateQuizTitle } from "./controllers/quizController.js";
+
+
+
+
 import {
   sendSignupOTP,
   registerUser,
@@ -77,6 +81,16 @@ app.get("/api/chat/:courseId", protect, getChatHistory);
 
 // Quiz
 app.post("/api/quiz/submit", protect, submitQuiz);
+app.post("/api/quiz/create", protect, createStandaloneQuiz);
+app.get("/api/quiz/video/:videoId", protect, getQuizzesByVideo);
+app.get("/api/quiz/:id", protect, getQuizById);
+app.delete("/api/quiz/:id", protect, deleteQuiz);
+app.put("/api/quiz/:id/title", protect, updateQuizTitle);
+app.post("/api/quiz/standalone/submit", protect, submitStandaloneQuiz);
+
+
+
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>

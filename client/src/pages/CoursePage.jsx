@@ -19,6 +19,8 @@ export default function CoursePage() {
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [activeLesson, setActiveLesson] = useState(0)
   const [view, setView] = useState('lesson') // 'lesson' | 'quiz'
+  const [isCreatingQuiz, setIsCreatingQuiz] = useState(false)
+
 
   const fetchCourse = useCallback(async () => {
     try {
@@ -45,6 +47,27 @@ export default function CoursePage() {
     const interval = setInterval(fetchCourse, 5000)
     return () => clearInterval(interval)
   }, [course, fetchCourse])
+
+  const handleCreateQuiz = async () => {
+    if (!window.confirm("Create a new AI-generated quiz for this video?")) return;
+    setIsCreatingQuiz(true);
+    try {
+      const { data } = await api.post('/quiz/create', { 
+        videoId: course.videoId
+      });
+
+      alert('Quiz created successfully!');
+      navigate(`/course/${id}/quizzes`);
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.error || 'Failed to create quiz.';
+      alert(msg);
+    } finally {
+      setIsCreatingQuiz(false);
+    }
+
+  }
+
 
   if (loading) return <>
     <Navbar />
@@ -165,8 +188,42 @@ export default function CoursePage() {
         </section>
 
         {/* Column 2: Content Area */}
-        <section className="col-middle">
+        <section className="col-middle relative">
+          {/* Header with Video Link and Quiz Actions */}
+          <div className="p-4 bg-white border-b border-zinc-100 flex items-center justify-between sticky top-0 z-10">
+            <a 
+              href={course.url} 
+              target="_blank" 
+              rel="noreferrer" 
+              className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 hover:opacity-80"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+              Watch Original Video
+            </a>
+            
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleCreateQuiz}
+                  disabled={isCreatingQuiz}
+                  className="px-4 py-2 bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-zinc-800 transition-all disabled:opacity-50"
+                >
+                  {isCreatingQuiz ? 'Generating...' : 'Create New Quiz'}
+                </button>
+                <Link 
+                  to={`/course/${id}/quizzes`}
+                  className="px-4 py-2 bg-primary text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:brightness-105 transition-all"
+                >
+                  View Quizzes
+                </Link>
+              </div>
+              <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter mr-2">Limit: 3 quizzes per video</p>
+            </div>
+          </div>
+
+
           <div className="flex-1 overflow-y-auto p-8 pb-32 scrollbar-thin scrollbar-thumb-zinc-200">
+
             {view === 'lesson' ? (
               <div className="space-y-8 animate-in fade-in duration-500">
                 <div className="space-y-4">
@@ -203,20 +260,7 @@ export default function CoursePage() {
             )}
           </div>
 
-          {/* Fixed Footer Bar */}
-          {view === 'lesson' && lesson.quiz?.length > 0 && (
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/95 to-transparent backdrop-blur-sm">
-              <button 
-                onClick={() => setView('quiz')}
-                className="w-full py-5 bg-accent text-primary font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:brightness-110 transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98]"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"></path>
-                </svg>
-                Create Knowledge Quiz
-              </button>
-            </div>
-          )}
+
         </section>
 
         {/* Column 3: AI Chat Interface */}

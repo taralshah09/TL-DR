@@ -5,6 +5,9 @@ import CoursePage from './pages/CoursePage'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import BYOK from './pages/BYOK'
+import QuizzesPage from './pages/QuizzesPage'
+import StandaloneQuizPage from './pages/StandaloneQuizPage'
+
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { Navigate } from 'react-router-dom'
 import World404 from './pages/World404'
@@ -39,6 +42,23 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/course/:id/quizzes"
+          element={
+            <ProtectedRoute>
+              <QuizzesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/course/:id/quiz/:quizId"
+          element={
+            <ProtectedRoute>
+              <StandaloneQuizPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/byok"
           element={
