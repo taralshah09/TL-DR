@@ -19,7 +19,7 @@ import { getSystemKeysForProvider } from "../utils/apiKeys.js";
 
 const PROVIDERS = { groq, together, openrouter, gemini };
 
-const PROVIDER_TIMEOUT_MS = 15_000; // 15 seconds per provider attempt
+const PROVIDER_TIMEOUT_MS = 60_000; // 60 seconds per provider attempt
 const MAX_RATE_LIMIT_RETRIES = 2;
 const RATE_LIMIT_BASE_DELAY_MS = 3000;
 
@@ -42,7 +42,7 @@ export async function call(task, prompt, { userApiKeys = {}, onUserKeyFailure = 
     const userKeyObj = userApiKeys?.[providerName];
     const userKey = userKeyObj?.apiKey;
     const systemKeys = getSystemKeysForProvider(providerName);
-    
+
     // Ordered list of keys to try: user key first (if any), then system keys
     const keysToTry = [];
     if (userKey) keysToTry.push({ type: 'user', key: userKey });
@@ -63,6 +63,7 @@ export async function call(task, prompt, { userApiKeys = {}, onUserKeyFailure = 
       const timer = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
 
       try {
+        console.log(`[AIRouter] Calling ${providerName}/${model} with key type ${activeKeyInfo.type}...`);
         let result = await provider.call(prompt, model, controller.signal, activeKeyInfo.key);
 
         clearTimeout(timer);
@@ -76,14 +77,14 @@ export async function call(task, prompt, { userApiKeys = {}, onUserKeyFailure = 
 
         // If the *user* key fails due to NO_KEY, INVALID_KEY, Daily Quota etc., we trigger the hook and fall back to system keys.
         const isQuotaOrAuthError = ["RATE_LIMIT", "INVALID_KEY", "DAILY_QUOTA"].includes(code);
-        
+
         if (activeKeyInfo.type === 'user' && (isQuotaOrAuthError || code === "NO_KEY")) {
-           console.warn(`[AIRouter] User key for ${providerName} failed: ${reason}. Falling back to system keys.`);
-           if (onUserKeyFailure && typeof onUserKeyFailure === 'function') {
-             await onUserKeyFailure(reason).catch(e => console.error("onUserKeyFailure error:", e.message));
-           }
-           currentKeyIndex++; // try next key (which will be a system key)
-           continue; 
+          console.warn(`[AIRouter] User key for ${providerName} failed: ${reason}. Falling back to system keys.`);
+          if (onUserKeyFailure && typeof onUserKeyFailure === 'function') {
+            await onUserKeyFailure(reason).catch(e => console.error("onUserKeyFailure error:", e.message));
+          }
+          currentKeyIndex++; // try next key (which will be a system key)
+          continue;
         }
 
         if (code === "NO_KEY") {
@@ -94,18 +95,18 @@ export async function call(task, prompt, { userApiKeys = {}, onUserKeyFailure = 
         }
 
         if (isQuotaOrAuthError) {
-           console.warn(`[AIRouter] ${providerName}/${model} failed on key index ${currentKeyIndex} (${code}): ${reason}`);
-           // Move to next key for hard limits/auth. For soft rate limits we could theoretically retry same key
-           // but iterating keys is safer if we have multiple.
-           currentKeyIndex++;
-           if (currentKeyIndex < keysToTry.length) {
-              console.log(`[AIRouter] Trying next key for ${providerName}...`);
-              continue;
-           } else {
-              // all keys exhausted for this provider
-              errors.push(`${providerName}/${model} all keys exhausted. Last err: ${code}`);
-              break; 
-           }
+          console.warn(`[AIRouter] ${providerName}/${model} failed on key index ${currentKeyIndex} (${code}): ${reason}`);
+          // Move to next key for hard limits/auth. For soft rate limits we could theoretically retry same key
+          // but iterating keys is safer if we have multiple.
+          currentKeyIndex++;
+          if (currentKeyIndex < keysToTry.length) {
+            console.log(`[AIRouter] Trying next key for ${providerName}...`);
+            continue;
+          } else {
+            // all keys exhausted for this provider
+            errors.push(`${providerName}/${model} all keys exhausted. Last err: ${code}`);
+            break;
+          }
         }
 
         // For TIMEOUT or general API_ERROR — move on to next PROVIDER in the chain entirely

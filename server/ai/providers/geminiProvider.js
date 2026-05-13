@@ -7,8 +7,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { proxyDispatcher } from "../../utils/proxy.js";
 
+console.log("[GeminiProvider] Loading module...");
 // Ordered list of Gemini models to try (newest, most capable first)
-// ... (rest of the code)
+const GEMINI_MODELS = [
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro",
+];
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 2000;
+
 
 export async function call(prompt, _model, signal, apiKey) {
   if (!apiKey) {
@@ -32,6 +40,7 @@ export async function call(prompt, _model, signal, apiKey) {
       }
 
       try {
+        console.log(`[GeminiProvider] Attempting model ${modelName} (attempt ${attempt + 1})...`);
         const result = await currentModel.generateContent(prompt);
         return { text: result.response.text().trim() };
       } catch (err) {

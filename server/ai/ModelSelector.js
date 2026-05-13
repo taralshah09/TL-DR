@@ -15,6 +15,7 @@ export const MODEL_CHAINS = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
     { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
   ],
 
@@ -22,6 +23,7 @@ export const MODEL_CHAINS = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
     { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
   ],
 
@@ -29,12 +31,14 @@ export const MODEL_CHAINS = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
     { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
   ],
 
   title: [
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
   ],
 
@@ -43,6 +47,7 @@ export const MODEL_CHAINS = {
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "openrouter", model: "mistralai/mistral-7b-instruct:free" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
   ],
 
@@ -51,6 +56,7 @@ export const MODEL_CHAINS = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
     { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
   ],
 
@@ -59,7 +65,15 @@ export const MODEL_CHAINS = {
     { provider: "groq", model: "llama-3.3-70b-versatile" },
     { provider: "together", model: "mistralai/Mixtral-8x7B-Instruct-v0.1" },
     { provider: "openrouter", model: "meta-llama/llama-3.3-70b-instruct:free" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
     { provider: "gemini", model: "gemini-2.0-flash" },
+  ],
+  
+  /** Reranking — fast model for ranking chunks */
+  rerank: [
+    { provider: "groq", model: "llama-3.1-8b-instant" },
+    { provider: "openrouter", model: "openai/gpt-4o-mini" },
+    { provider: "openrouter", model: "meta-llama/llama-3.1-8b-instruct:free" },
   ],
 };
 
