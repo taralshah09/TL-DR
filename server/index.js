@@ -14,7 +14,7 @@ import {
   getCourseStatus,
   deleteCourse,
 } from "./controllers/courseController.js";
-import { chat, getChatHistory } from "./controllers/chatController.js";
+import { chat, getChatHistory, getConversations, createConversation, deleteConversation, renameConversation } from "./controllers/chatController.js";
 import { submitQuiz, createStandaloneQuiz, getQuizzesByVideo, submitStandaloneQuiz, getQuizById, deleteQuiz, updateQuizTitle } from "./controllers/quizController.js";
 
 
@@ -76,8 +76,12 @@ app.get("/api/courses/:id", protect, getCourseById);
 app.delete("/api/courses/:id", protect, deleteCourse);
 
 // Chat
+app.get("/api/conversations", protect, getConversations);
+app.post("/api/conversations", protect, createConversation);
+app.put("/api/conversations/:id/title", protect, renameConversation);
+app.delete("/api/conversations/:id", protect, deleteConversation);
 app.post("/api/chat", protect, chat);
-app.get("/api/chat/:courseId", protect, getChatHistory);
+app.get("/api/chat/:id", protect, getChatHistory);
 
 // Quiz
 app.post("/api/quiz/submit", protect, submitQuiz);
