@@ -232,39 +232,9 @@
 
 /* ===================== RIGHT COLUMN ===================== */
 .col-right {
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border);
-}
-
-.ai-tutor-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.chat-scroll-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  background: #18181b;
+  border-left: 1px solid rgba(255,255,255,0.07);
   overflow: hidden;
-}
-
-/* Override ChatWidget internal styles to fit this container */
-.chat-scroll-container .chat-widget {
-  height: 100% !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-.chat-scroll-container .chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-}
-
-.chat-scroll-container .chat-input-area {
-  padding: 20px;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
 }
 
 /* Responsive */
