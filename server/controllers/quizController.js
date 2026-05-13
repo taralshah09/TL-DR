@@ -53,23 +53,25 @@ export async function createStandaloneQuiz(req, res) {
     const { videoId, title } = req.body;
     if (!videoId) return res.status(400).json({ error: "videoId is required" });
 
-    // Rate limit: Max 3 quizzes per video per user
-    const count = await Quiz.countDocuments({ videoId, userId: req.user._id });
-    if (count >= 3) {
-      return res.status(403).json({ error: "You've reached the limit of 3 quizzes for this video." });
+    // 1. Check lifetime limit on User model
+    // This ensures that even if a course is deleted and recreated, the limit persists.
+    if (!req.user.quizUsage) req.user.quizUsage = new Map();
+    const lifetimeCount = req.user.quizUsage.get(videoId) || 0;
+
+    if (lifetimeCount >= 3) {
+      return res.status(403).json({ 
+        error: "You've reached the limit of 3 quizzes for this video. This limit persists even if the video is deleted and recreated." 
+      });
     }
 
-    // Fetch transcript to generate quiz
-
+    // 2. Fetch transcript and generate quiz
     const transcriptData = await fetchTranscript(videoId);
     const fullText = joinTranscript(transcriptData.items);
 
     const questions = await generateQuiz(title || "Quiz", fullText, req.user);
 
-    // Create a unique name if no title provided
-    const finalTitle = title || `Quiz #${count + 1}`;
-
-
+    // Create a unique title if none provided
+    const finalTitle = title || `Quiz #${lifetimeCount + 1}`;
 
     const quiz = new Quiz({
       videoId,
@@ -78,10 +80,21 @@ export async function createStandaloneQuiz(req, res) {
       questions,
     });
 
-
     await quiz.save();
+
+    // 3. Update User's lifetime counter
+    req.user.quizUsage.set(videoId, lifetimeCount + 1);
+    await req.user.save();
+
+    // 4. Update Course's local counter (if course exists for this video)
+    await Course.findOneAndUpdate(
+      { userId: req.user._id, videoId },
+      { $inc: { quizCount: 1 } }
+    );
+
     res.status(201).json({ quiz });
   } catch (err) {
+    console.error("createStandaloneQuiz error:", err.message);
     res.status(500).json({ error: err.message });
   }
 }
@@ -150,6 +163,13 @@ export async function deleteQuiz(req, res) {
   try {
     const quiz = await Quiz.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
     if (!quiz) return res.status(404).json({ error: "Quiz not found" });
+
+    // Decrement Course's local counter (current active quizzes for this course document)
+    await Course.findOneAndUpdate(
+      { userId: req.user._id, videoId: quiz.videoId },
+      { $inc: { quizCount: -1 } }
+    );
+
     res.json({ message: "Quiz deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

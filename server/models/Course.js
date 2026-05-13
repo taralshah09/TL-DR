@@ -38,6 +38,7 @@ const CourseSchema = new mongoose.Schema(
     },
     errorMessage: { type: String },
     warningMessage: { type: String },
+    quizCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

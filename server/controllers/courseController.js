@@ -50,6 +50,7 @@ export async function getAllCourses(req, res) {
       status: c.status,
       createdAt: c.createdAt,
       lessonCount: c.lessons?.length || 0,
+      quizCount: c.quizCount || 0,
     }));
 
     res.json({ courses: withMeta });

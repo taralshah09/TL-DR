@@ -15,7 +15,12 @@ const UserSchema = new mongoose.Schema(
     openrouter: {
       apiKey: { type: String, default: "" }
     },
-    transcriptCount: { type: Number, default: 0 }
+    transcriptCount: { type: Number, default: 0 },
+    quizUsage: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   { timestamps: true }
 );
